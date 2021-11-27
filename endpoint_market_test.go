@@ -26,8 +26,10 @@ func TestEndpoint_GetTradeHistories(t *testing.T) {
 func TestMarketEndpoint_GetKLine(t *testing.T) {
 	kubcoin := NewKucoinClient(APIKey, APISecret, APIPassPhrase)
 	resp, err := NewMarketEndPoint(kubcoin).GetKLine(context.Background(), GetKLineRequest{
-		Symbol: "NUM-USDT",
-		Type:   ENUM_KLINE_TYPE_1MIN,
+		Symbol:  "BASIC-USDT",
+		StartAt: StringPointer("1636822800"),
+		EndAt:   StringPointer("1636823400"),
+		Type:    ENUM_KLINE_TYPE_1MIN,
 	})
 	if err != nil {
 		fmt.Println(err)

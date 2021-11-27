@@ -166,27 +166,27 @@ func (e MarketEndpoint) GetKLine(ctx context.Context, req GetKLineRequest) ([]Ge
 			} else {
 				retItem.OpenPrice = openPrice
 			}
-			if closePrice, err := strconv.ParseFloat(item[1], 64); err != nil {
+			if closePrice, err := strconv.ParseFloat(item[2], 64); err != nil {
 				return nil, err
 			} else {
 				retItem.ClosePrice = closePrice
 			}
-			if highestPrice, err := strconv.ParseFloat(item[1], 64); err != nil {
+			if highestPrice, err := strconv.ParseFloat(item[3], 64); err != nil {
 				return nil, err
 			} else {
 				retItem.HighestPrice = highestPrice
 			}
-			if lowestPrice, err := strconv.ParseFloat(item[1], 64); err != nil {
+			if lowestPrice, err := strconv.ParseFloat(item[4], 64); err != nil {
 				return nil, err
 			} else {
 				retItem.LowestPrice = lowestPrice
 			}
-			if transactionVolume, err := strconv.ParseFloat(item[1], 64); err != nil {
+			if transactionVolume, err := strconv.ParseFloat(item[5], 64); err != nil {
 				return nil, err
 			} else {
 				retItem.TransactionVolume = transactionVolume
 			}
-			if transactionAmount, err := strconv.ParseFloat(item[1], 64); err != nil {
+			if transactionAmount, err := strconv.ParseFloat(item[6], 64); err != nil {
 				return nil, err
 			} else {
 				retItem.TransactionAmount = transactionAmount
