@@ -2,9 +2,6 @@ package kucoingo
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -17,22 +14,16 @@ type MarketEndpoint struct {
 	conf Kucoin
 }
 
-func NewMarketEndPoint(conf Kucoin) MarketEndpoint {
-	return MarketEndpoint{
-		conf: conf,
-	}
-}
-
 type GetTradeHistoriesRequest struct {
 	Symbol string
 }
 
 type GetTradeHistoriesResponse struct {
-	Code string                           `json:"code"`
-	Data []GetTradeHistoriesResponse_Item `json:"data"`
+	Code string                          `json:"code"`
+	Data []GetTradeHistoriesResponseItem `json:"data"`
 }
 
-type GetTradeHistoriesResponse_Item struct {
+type GetTradeHistoriesResponseItem struct {
 	Sequence string `json:"sequence"`
 	Price    string `json:"price"`
 	Size     string `json:"size"`
@@ -46,19 +37,10 @@ func (e MarketEndpoint) GetTradeHistories(ctx context.Context, req GetTradeHisto
 	q := httpReq.URL.Query()
 	q.Set("symbol", req.Symbol)
 	httpReq.URL.RawQuery = q.Encode()
-	timestamp := strconv.Itoa(int(time.Now().Unix()))
-	h := hmac.New(sha256.New, []byte(e.conf.GetAPISecret()))
-	h.Write([]byte(timestamp + http.MethodGet + path))
-	httpReq.Header.Set(HeaderAPIKey, e.conf.GetAPIKey())
-	httpReq.Header.Set(HeaderAPISign, base64.StdEncoding.EncodeToString(h.Sum(nil)))
-	httpReq.Header.Set(HeaderAPITimeStamp, timestamp)
 
-	h1 := hmac.New(sha256.New, []byte(e.conf.GetAPISecret()))
-	h1.Write([]byte(e.conf.GetAPIPassPhrase()))
-	httpReq.Header.Set(HeaderAPIPassPhase, base64.StdEncoding.EncodeToString(h.Sum(nil)))
-	httpReq.Header.Set(HeaderAPIKeyVersion, "V2")
+	e.conf.signRequest(httpReq, time.Now(), path, nil)
+
 	var ret GetTradeHistoriesResponse
-
 	if resp, err := http.DefaultClient.Do(httpReq); err != nil {
 		return nil, err
 	} else if bodyByte, err := ioutil.ReadAll(resp.Body); err != nil {
@@ -86,19 +68,19 @@ type GetKLineRequest struct {
 type EnumKLineType string
 
 const (
-	ENUM_KLINE_TYPE_1MIN   = "1min"
-	ENUM_KLINE_TYPE_3MIN   = "3min"
-	ENUM_KLINE_TYPE_5MIN   = "5min"
-	ENUM_KLINE_TYPE_15MIN  = "15min"
-	ENUM_KLINE_TYPE_30MIN  = "30min"
-	ENUM_KLINE_TYPE_1HOUR  = "1hour"
-	ENUM_KLINE_TYPE_2HOUR  = "2hour"
-	ENUM_KLINE_TYPE_4HOUR  = "4hour"
-	ENUM_KLINE_TYPE_6HOUR  = "6hour"
-	ENUM_KLINE_TYPE_8HOUR  = "8hour"
-	ENUM_KLINE_TYPE_12HOUR = "12hour"
-	ENUM_KLINE_TYPE_1DAY   = "1day"
-	ENUM_KLINE_TYPE_1WEEK  = "1week"
+	EnumKlineType1min    = "1min"
+	EnumKlineType3min     = "3min"
+	EnumKlineType5min     = "5min"
+	EnumKlineType15min    = "15min"
+	EnumKlineType30min    = "30min"
+	EnumKlineType1hour    = "1hour"
+	EnumKlineType2hour    = "2hour"
+	EnumKlineType4hour    = "4hour"
+	EnumKlineType6hour     = "6hour"
+	EnumKlineType8hour   = "8hour"
+	EnumKlineType12hour   = "12hour"
+	EnumKlineType1day  = "1day"
+	EnumKlineType1week = "1week"
 )
 
 type GetKLineResponse struct {
@@ -124,17 +106,9 @@ func (e MarketEndpoint) GetKLine(ctx context.Context, req GetKLineRequest) ([]Ge
 	}
 	q.Set("type", string(req.Type))
 	httpReq.URL.RawQuery = q.Encode()
-	timestamp := strconv.Itoa(int(time.Now().Unix()))
-	h := hmac.New(sha256.New, []byte(e.conf.GetAPISecret()))
-	h.Write([]byte(timestamp + http.MethodGet + path))
-	httpReq.Header.Set(HeaderAPIKey, e.conf.GetAPIKey())
-	httpReq.Header.Set(HeaderAPISign, base64.StdEncoding.EncodeToString(h.Sum(nil)))
-	httpReq.Header.Set(HeaderAPITimeStamp, timestamp)
 
-	h1 := hmac.New(sha256.New, []byte(e.conf.GetAPISecret()))
-	h1.Write([]byte(e.conf.GetAPIPassPhrase()))
-	httpReq.Header.Set(HeaderAPIPassPhase, base64.StdEncoding.EncodeToString(h.Sum(nil)))
-	httpReq.Header.Set(HeaderAPIKeyVersion, "V2")
+	e.conf.signRequest(httpReq, time.Now(), path, nil)
+
 	var respBody struct {
 		Code int        `json:"string"`
 		Data [][]string `json:"data"`
